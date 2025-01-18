@@ -1,0 +1,23 @@
+1. uname: The uname command displays information about
+the system's kernel including the kernel name, hostname, kernel release,
+kernel version, and machine hardware name. There are also a variety of parameters
+that you can use with the uname command. The most important ones include:
+    - uname -s: displays kernel name
+    - uname -n: displays the hostname
+    - uname -r: displays the kernel release
+    - uname -v: displays the kernel version
+    - uname -m: displays the machine hardware name
+    - uname -a: displays all information regarding the kernel
+
+2. top: The top command is essentially the command line version of task manager from
+Windows. This command is a monitoring tool that displays real-time information about
+system processes and resource utilization, including CPU usage, memory usage,
+and process information.
+
+3. cmp: The cmp command is used to compare two files and displays the first byte
+that is different between them. This can be very useful in identifying differences
+between binary files or to check for corruption in files.
+
+Resources:
+https://www.digitalocean.com/community/tutorials/linux-commands
+https://manpages.ubuntu.com/cgi-bin/search.py?q=man&titles=Title
