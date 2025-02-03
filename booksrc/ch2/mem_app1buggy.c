@@ -43,6 +43,10 @@ int main(int argc, char **argv)
 		dest = arbit_addr;	/* bug! */
 	memcpy(dest, src, n);
 
+	//src[0] = 'Z';
+	printf("src=%p\n", src);
+	printf("&src=%p\n", &src);
+
 	free(ptr);
 	exit(0);
 }
