@@ -18,5 +18,5 @@ test_mymalloc.o: test_mymalloc.c mymalloc.h
 mymalloc.o: mymalloc.c mymalloc.h
 	${CC} ${CFLAGS} -c mymalloc.c -o mymalloc.o
 
-clean:	# removes object files & executable file
+clean:	# removes object files & executable file <- phony target
 	rm -vf *.o ${ALL}
