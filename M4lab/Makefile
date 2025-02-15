@@ -1,27 +1,29 @@
-CC=gcc
-CFLAGS=-g -ggdb -gdwarf-4 -O0 -Wall -Wextra -DUNIT_TEST
-LIBS=-lcmocka
+CC = gcc
+CFLAGS = -g -ggdb -gdwarf-4 -O0 -Wall -Wextra
+LIBS = -lcmocka
 
-all: test_input
+all: input_main test_input
 
-test_input: input.o test_input.o
-	@echo "\nLink step:"
-	gcc $(LDFLAGS) -o test_input test_input.o input.o $(LIBS) 
+input_main: input_main.o
+	@echo "\nLink step to create input_main:"
+	$(CC) -o input_main input_main.o
+
+input_main.o: input.c
+	$(CC) -Wall -Wextra -c input.c -o input_main.o
+
+test_input: test_input.o input.o
+	@echo "\nLink step to create test_input:"
+	$(CC) $(CFLAGS) -o test_input test_input.o input.o $(LIBS)
 
 input.o: input.c
-	gcc $(CFLAGS) -c input.c
+	$(CC) $(CFLAGS) -DUNIT_TEST -c input.c -o input.o
 
-test_list.o: test_input.c
-	gcc $(CFLAGS) -c test_input.c
-
-test: test_input
-	@echo
-	./test_input
+test_input.o: test_input.c
+	$(CC) $(CFLAGS) -DUNIT_TEST -c test_input.c
 
 clean:
 	@echo
-	rm -fv test_input *.o
+	rm -fv input_main test_input *.o
 	@echo
 
-# make sure to mark phony targets in the case that you have a file that shares a name with one of these targets
 .PHONY: all clean
