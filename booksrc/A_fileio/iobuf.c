@@ -10,7 +10,10 @@
  ****************************************************************
  * Brief Description:
  * Library (stdio) layer file IO APIs demo.
- *
+ * 
+ * ltrace -S ./iobuf 1 2>&1 | grep SYS_ | less
+ * strace ./iobuf 8 2>&1 | grep -E "read\(4|write\(3" | wc -l
+ * 
  * For details, please refer the book, Ch A, File I/O Essentials.
  */
 #define _GNU_SOURCE
@@ -32,7 +35,12 @@ static char *gbuf = NULL;
 
 static void testit(FILE * wrstrm, FILE * rdstrm, int numio)
 {
-	int i, syscalls = NREAD * numio / getpagesize();
+	int page_size = getpagesize();
+	int i, syscalls = NREAD * numio / page_size;
+
+	// UPDATE: A remainder means that 1 more system call must be
+	// made to flush a partially filled buffer
+	syscalls += (NREAD * numio) % page_size > 0 ? 1 : 0;
 	size_t fnr = 0;
 
 	if (syscalls <= 0)
@@ -44,6 +52,7 @@ static void testit(FILE * wrstrm, FILE * rdstrm, int numio)
 		fnr = fread(gbuf, 1, NREAD, rdstrm);
 		if (!fnr)
 			FATAL("fread on /dev/urandom failed\n");
+		//fflush(rdstrm); demo code -> typically do not want to flush the read stream
 
 		if (!fwrite(gbuf, 1, fnr, wrstrm)) {
 			free(gbuf);
@@ -52,6 +61,7 @@ static void testit(FILE * wrstrm, FILE * rdstrm, int numio)
 			if (ferror(wrstrm))
 				FATAL("fwrite on our file failed\n");
 		}
+		fflush(wrstrm);	// demo code
 	}
 }
 
