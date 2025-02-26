@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 	if (fork() == -1)
 		FATAL("fork failed!\n");
 
-	printf("PID %d: Hello, fork.\n", getpid());
+	printf("PID %d: Hello, fork.\n", getpid());	// child PID = parent PID + 1
 	exit(EXIT_SUCCESS);
 }
 
