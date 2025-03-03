@@ -53,12 +53,14 @@ int main(int argc, char **argv)
 	switch ((ret = fork())) {
 	case -1:
 		FATAL("fork failed, aborting!\n");
+
 	case 0:		/* Child */
 		printf("Child process, PID %d:\n"
 		       " return %d from fork()\n", getpid(), ret);
 		foo(atoi(argv[1]));
 		printf("Child process (%d) done, exiting ...\n", getpid());
 		exit(EXIT_SUCCESS);
+
 	default:		/* Parent */
 		printf("Parent process, PID %d:\n"
 		       " return %d from fork()\n", getpid(), ret);
@@ -69,3 +71,9 @@ int main(int argc, char **argv)
 }
 
 /* vi: ts=8 */
+
+/* 
+to demo zombie state, ./fork4 5 300
+then run ps -al in another terminal
+and look at S (status) column.
+*/

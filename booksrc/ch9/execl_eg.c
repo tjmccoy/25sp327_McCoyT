@@ -36,7 +36,7 @@ int main(int argc, char **argv)
 	if (execl("/bin/uname", "uname", argv[1], (char *)0) == -1)
 		FATAL("execl failed\n");
 	
-	printf("This should never get executed!\n");
+	printf("This should never get executed!\n");	// bc line 36 will take over the VAS
 	exit (EXIT_SUCCESS);
 }
 
