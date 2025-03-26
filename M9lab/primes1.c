@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    /* cast args as long long values*/
+    /* cast args as long long values */
     number1 = atoll(argv[1]);
     number2 = atoll(argv[2]);
 
@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
         HANDLE_ERROR(rval, "pthread_create progress");
     }
 
-    /* have threads wait for their work to be done before terminating*/
+    /* have threads wait for their work to be done before terminating */
     pthread_detach(tid_progress);
     pthread_join(tid_prime1, NULL);
     pthread_join(tid_prime2, NULL);
