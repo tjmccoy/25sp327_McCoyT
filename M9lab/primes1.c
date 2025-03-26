@@ -3,7 +3,14 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#define HANDLE_ERROR(errnum, msg) \
+    do { \
+        fprintf(stderr, "%s: (%s) %s\n", msg, strerrorname_np(errnum), strerror(errnum)); \
+        exit(EXIT_FAILURE); \
+    } while (0)
+
 void* isprime(void* data);
+void* progress(void* data);
 
 int main(int argc, char* argv[]) 
 {
@@ -22,25 +29,47 @@ int main(int argc, char* argv[])
     number2 = atoll(argv[2]);
 
     /* initialize thread attributes & validate */
+    int rval;
     pthread_attr_t th_attr;
-    if (pthread_attr_init(&th_attr) != 0)
+
+    if ((rval = pthread_attr_init(&th_attr)) != 0) 
     {
-        perror("pthread_attr_init");
-        exit(EXIT_FAILURE);
+        HANDLE_ERROR(rval, "pthread_attr_init");
+    }
+    if ((rval = pthread_attr_setdetachstate(&th_attr, PTHREAD_CREATE_JOINABLE)) != 0) 
+    {
+        HANDLE_ERROR(rval, "pthread_attr_setdetachstate");
     }
 
-    /* thread declaration & initialization */
+    /* thread declaration */
     pthread_t tid_prime1;
     pthread_t tid_prime2;
-    pthread_create(&tid_prime1, &th_attr, isprime, &number1);
-    pthread_create(&tid_prime2, &th_attr, isprime, &number2);
+    pthread_t tid_progress;
+
+    /* thread initialization and error handling */
+    if ((rval = pthread_create(&tid_prime1, &th_attr, isprime, &number1))) {
+        HANDLE_ERROR(rval, "pthread_create isprime1");
+    }
+    if ((rval = pthread_create(&tid_prime2, &th_attr, isprime, &number2))) {
+        HANDLE_ERROR(rval, "pthread_create isprime2");
+    }
+    if ((rval = pthread_create(&tid_progress, &th_attr, progress, NULL))) {
+        HANDLE_ERROR(rval, "pthread_create progress");
+    }
 
     /* have threads wait for their work to be done before terminating*/
+    pthread_detach(tid_progress);
     pthread_join(tid_prime1, NULL);
     pthread_join(tid_prime2, NULL);
 
+    //sleep(3); observe threads using htop
+
     /* clean-up */
+    if ((rval = pthread_cancel(tid_progress)) != 0) {
+        HANDLE_ERROR(rval, "pthread_cancel");
+    }
     pthread_attr_destroy(&th_attr);
+    //sleep(5); observe threads using htop
     printf("Done!\n");
 
     return 0;
@@ -49,10 +78,22 @@ int main(int argc, char* argv[])
 void* isprime(void *data)
 {
     long long num = *((long long*) data);   // dereference data & store as a long long
-    printf("isprime %lld\n", num);
+    int prime = 1;
 
-    //TODO: write code to determine if num is prime & print result
-    // LATER: return result & check return values w/ api call
+    for (long long j = 2; j < num; j++) 
+    {
+        if (num % j == 0) { prime = 0; }
+    }
+    printf("\n%lld is %s.\n", num, prime ? "prime" : "composite");
+    pthread_exit(NULL);
+}
 
+void* progress(void* data) {
+    while(1) 
+    {
+        sleep(1);
+        printf(".");
+        fflush(stdout);
+    }
     pthread_exit(NULL);
 }
