@@ -1,12 +1,13 @@
-/* Private/internal queue attributes */
-
-#include "queue.h"
+/**
+ * Private or internal queue attributes
+ */
 #include <stdbool.h>
+#include "queue.h"
 
 typedef struct queue_node {
     void* data;
     struct queue_node* next;
-} queue_node_t; 
+} queue_node_t;
 
 struct queue {
     queue_node_t* header;
