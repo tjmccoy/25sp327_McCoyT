@@ -1,7 +1,6 @@
 /**
  * This is the public facing header file
  */
-
  #include <pthread.h>
  #include <stdio.h>
  #include <stdbool.h>

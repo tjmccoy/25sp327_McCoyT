@@ -1,7 +1,8 @@
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include "common.h"
 #include "queue_internal.h"
-#include "queue.h"  // should NOT have to include queue.h b/c internal should bring it in. FIX THIS
+#include "queue.h"
 
 queue_t* queue_init(pthread_mutex_t* mutex, pthread_cond_t* cond_var) {
     // allocate memory for the queue
@@ -44,10 +45,52 @@ void queue_enqueue(queue_t* q, void* data) {
     new_node->data = data;
     new_node->next = NULL;
 
-    // BEGIN CS
+    LOCK_MTX(q->mutex);
     q->tail->next = new_node;
     q->tail = new_node;
     q->size += 1;
+    UNLOCK_MTX(q->mutex);
+}
 
-    // END CS
+void queue_destroy(queue_t* q) {
+    free(q->header);
+    free(q);
+}
+
+void queue_close(queue_t* q) {
+    LOCK_MTX(q->mutex);
+    q->isClosed = true;
+    UNLOCK_MTX(q->mutex);
+}
+
+bool queue_isclose(queue_t* q) {
+    bool closed = false;
+    LOCK_MTX(q->mutex);
+    closed = q -> isClosed;
+    UNLOCK_MTX(q->mutex);
+
+    return closed;
+}
+
+void* queue_dequeue(queue_t* q) {
+    if (!q) return NULL;    // case 0: queue doesn't exist
+
+    LOCK_MTX(q->mutex); // begin work in critical section
+    if (q->header == q->tail) {
+        UNLOCK_MTX(q->mutex);
+        return NULL;
+    }
+
+    queue_node_t* old_head = q->header; // pointer manipulation
+    void* data = old_head->data;
+    q->header = old_head->next;
+    q->size -= 1;
+
+    if (!q->header) {   // if queue is now empty, update tail
+        q->tail = NULL;
+    }
+    free(old_head); // free allocated memory
+    UNLOCK_MTX(q->mutex);   // critical section work is done, unlock the mutex
+
+    return data;
 }

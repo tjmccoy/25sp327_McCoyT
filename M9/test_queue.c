@@ -15,6 +15,16 @@ typedef struct {
     int x;
 } data_t;
 
+int __wrap_pthread_mutex_lock(pthread_mutex_t* mtx) {
+    UNUSED(mtx);
+    return mock_type(int);
+}
+int __wrap_pthread_mutex_unlock(pthread_mutex_t* mtx) {
+    UNUSED(mtx);
+    return mock_type(int);
+}
+// need to wrap pthread_cond_wait and pthread_cond_broadcast 
+
 void test_queue_init(void** state) {
     UNUSED(state);
 
@@ -46,21 +56,79 @@ void test_queue_enqueue_when_q_empty(void** state) {
     pthread_cond_t cond_var;
     queue_t* que = queue_init(&mutex, &cond_var);
     data_t data;
+    will_return(__wrap_pthread_mutex_lock, 0);
+    will_return(__wrap_pthread_mutex_unlock, 0);
 
     // Act
     queue_enqueue(que, &data);
 
     // Assert
     assert_int_equal(que->size, 1);
-    // TODO add asserts to verify links are correct.
-    // TODO add asserts to verify data is set in tail node.
+    assert_ptr_equal(que->header->next, que->tail);
+    assert_null(que->header->data);
+    assert_non_null(que->tail);
+    assert_non_null(que->tail->data);
 
+    // Teardown
+    free(que->tail);
+    free(que->header);
+    free(que);
 }
+
+void test_queue_destroy(void** state) {
+    UNUSED(state);
+    
+    // Arrange
+    pthread_mutex_t mutex;
+    pthread_cond_t cond_var;
+    //queue_t* que = queue_init(&mutex, &cond_var);
+    will_return(__wrap_pthread_mutex_lock, 0);
+    will_return(__wrap_pthread_mutex_unlock, 0);
+    
+
+    // Act
+
+    // Assert
+
+    // Teardown
+    
+}
+
+void test_queue_dequeue(void** state) {
+    UNUSED(state);
+
+    // Arrange
+    pthread_mutex_t mutex;
+    pthread_cond_t cond_var;
+    queue_t* q = queue_init(&mutex, &cond_var);
+    data_t data;
+    will_return_always(__wrap_pthread_mutex_lock, 0);
+    will_return_always(__wrap_pthread_mutex_unlock, 0);
+
+    // Act
+    queue_enqueue(q, &data);
+    assert_int_equal(q->size, 1);   // make sure queue had an element enqueued
+
+    void* returned_val = queue_dequeue(q);
+
+    // Assert
+    assert_int_equal(q->size, 0);
+    assert_ptr_equal(q->header, q->tail);
+    void* null_val = queue_dequeue(q);
+    assert_null(null_val);
+
+    // Teardown
+    free(returned_val);
+    free(q->header);
+    free(q);
+}
+
 
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_queue_init),
-        cmocka_unit_test(test_queue_enqueue_when_q_empty)
+        cmocka_unit_test(test_queue_enqueue_when_q_empty),
+        cmocka_unit_test(test_queue_dequeue)
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

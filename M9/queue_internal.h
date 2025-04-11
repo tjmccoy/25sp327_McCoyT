@@ -1,6 +1,10 @@
 /**
  * Private or internal queue attributes
  */
+
+#ifndef QUEUE_H
+#define QUEUE_H
+
 #include <stdbool.h>
 #include "queue.h"
 
@@ -17,3 +21,5 @@ struct queue {
     pthread_mutex_t* mutex;
     pthread_cond_t* cond_var;
 };
+
+#endif
