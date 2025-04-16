@@ -51,8 +51,8 @@ int main(void) {
     }
 
     /* If connection is established then start communicating */
-    bzero(buffer, 256);
-    n = read(newsockfd, buffer, 255);
+    memset(buffer, 0, 256);
+    n = recv(newsockfd, buffer, 255, 0);
 
     if (n < 0) {
         perror("ERROR reading from socket");
@@ -62,7 +62,7 @@ int main(void) {
     printf("Here is the message: %s\n", buffer);
 
     /* Write a response to the client */
-    n = write(newsockfd, "I got your message", 18);
+    n = send(newsockfd, "I got your message", 18, 0);
 
     if (n < 0) {
         perror("ERROR writing to socket");
