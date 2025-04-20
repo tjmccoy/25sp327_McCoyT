@@ -19,4 +19,6 @@ struct worker_thread_params {
 /// @return NULL
 extern void* do_work(void* thread_params);
 
+extern pthread_t create_worker_thread(struct worker_thread_params* params);
+
 #endif

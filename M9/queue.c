@@ -60,6 +60,7 @@ void queue_destroy(queue_t* q) {
 void queue_close(queue_t* q) {
     LOCK_MTX(q->mutex);
     q->isClosed = true;
+    pthread_cond_broadcast(q->cond_var);
     UNLOCK_MTX(q->mutex);
 }
 

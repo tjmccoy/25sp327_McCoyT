@@ -4,6 +4,8 @@
 
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "common.h"
 #include "queue.h"
@@ -18,22 +20,29 @@ int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
 
-    // TODO: Accept command-line arguments for the following:
+    // Accept command-line arguments for:
     // - number of worker threads
     // - total number of requests to generate
-    int num_threads = 0;
-    int num_requests = 0;
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <num_threads> <num_requests>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    int num_threads = atoi(argv[1]);
+    int num_requests = atoi(argv[2]);
 
     // seed random number to vary results between program executions
     srand(time(NULL));
 
-    // TODO: initialize mutex and cond variables
+    // initialize mutex and cond variables
     pthread_mutex_t req_mutex;
     pthread_cond_t req_cond;
+    pthread_mutex_init(&req_mutex, NULL);
+    pthread_cond_init(&req_cond, NULL);
 
-    // TODO: initialize queue and thread pool
-    queue_t* que = NULL;
-    struct thread_pool* thread_pool = NULL;
+    // initialize queue and thread pool
+    queue_t* que = queue_init(&req_mutex, &req_cond);
+    struct thread_pool* thread_pool = thread_pool_init(que, num_threads);
 
     int count = 1;
     while (count <= num_requests) {
@@ -47,7 +56,9 @@ int main(int argc, char* argv[]) {
     thread_pool_destroy(thread_pool);
     queue_destroy(que);
 
-    // TODO: Perform cleanup tasks here
+    // cleanup mutex and cond var
+    pthread_mutex_destroy(&req_mutex);
+    pthread_cond_destroy(&req_cond);
 
     pthread_exit((void*)0);
 }
@@ -75,7 +86,7 @@ static void random_sleep_time_in_range(int min_ms, int max_ms, struct timespec* 
     ts->tv_nsec = (millis % 1000) * 1000000L;
 }
 
-/// @brief Creates an request of the given task_type
+/// @brief Creates a request of the given task_type
 /// @param task_type 
 /// @return a populated request
 static request_t* create_request(int task_type) {

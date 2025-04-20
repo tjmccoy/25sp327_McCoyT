@@ -23,8 +23,7 @@
 #define handle_error_en(en, msg)                         \
     do                                                   \
     {                                                    \
-        fprintf(stderr, "%s: (%s) %s\n",                 \
-                msg, strerrorname_np(en), strerror(en)); \
+        fprintf(stderr, "%s: %s\n", msg, strerror(en));  \
         exit(EXIT_FAILURE);                              \
     } while (0)
 
@@ -32,8 +31,7 @@
     do                                                   \
     {                                                    \
         int en = errno;                                  \
-        fprintf(stderr, "%s: (%s) %s\n",                 \
-                msg, strerrorname_np(en), strerror(en)); \
+        fprintf(stderr, "%s: %s\n", msg, strerror(en));  \
         exit(EXIT_FAILURE);                              \
     } while (0)
 

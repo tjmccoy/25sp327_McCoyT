@@ -19,7 +19,7 @@ struct worker_thread {
 struct thread_pool {
     int next_thread_id;                                // next thread id to assign
     int num_threads;                                   // number of threads in pool
-    struct worker_thread threads[MAX_WORKER_THREADS];  // threads
+    struct worker_thread* threads[MAX_WORKER_THREADS];  // threads
     queue_t* que;                                      // queue used by threads
 };
 
