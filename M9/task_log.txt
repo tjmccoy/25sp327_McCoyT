@@ -1,0 +1,9 @@
+[2025-04-19 23:53:50] [Thread 143872] Log message 1
+[2025-04-19 23:53:57] [Thread 143871] Sum of numbers < 270 is 36315
+[2025-04-19 23:53:58] [Thread 143872] Sum of numbers < 576 is 165600
+[2025-04-19 23:53:58] [Thread 143872] Sum of numbers < 341 is 57970
+[2025-04-19 23:55:13] [Thread 143871] Simulated delay of 0 seconds and 62 milliseconds.
+[2025-04-19 23:55:13] [Thread 143871] Sum of numbers < 564 is 158766
+[2025-04-20 00:07:04] [Thread 143872] Sum of numbers < 302 is 45451
+[2025-04-20 00:08:26] [Thread 143871] Sum of numbers < 869 is 377146
+[2025-04-20 00:09:00] [Thread 143871] Simulated delay of 0 seconds and 40 milliseconds.
