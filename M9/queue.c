@@ -53,14 +53,23 @@ void queue_enqueue(queue_t* q, void* data) {
 }
 
 void queue_destroy(queue_t* q) {
-    free(q->header);
+    queue_node_t* curr = q->header;
+    while (curr != NULL) {
+        queue_node_t* next = curr->next;
+        if (curr->data != NULL) {
+            request_t* req = (request_t*)curr->data;
+            free(req->arg);
+            free(req);
+        }
+        free(curr);
+        curr = next;
+    }
     free(q);
 }
 
 void queue_close(queue_t* q) {
     LOCK_MTX(q->mutex);
     q->isClosed = true;
-    pthread_cond_broadcast(q->cond_var);
     UNLOCK_MTX(q->mutex);
 }
 
