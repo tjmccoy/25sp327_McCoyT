@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
     queue_t* que = queue_init(&req_mutex, &req_cond);
     struct thread_pool* thread_pool = thread_pool_init(que, num_threads);
 
-    int count = 1;
+    int count = 0;
     while (count <= num_requests) {
         int task_type = rand() % 3;
         queue_enqueue(que, create_request(task_type));
