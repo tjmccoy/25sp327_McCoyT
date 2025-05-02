@@ -162,8 +162,39 @@ static bool parse_http_request(const char *buffer, char *hostname, int *port) {
  * @return the socket for the target server or -1 on failure to connect
  */
 static int connect_to_target_server(const char *hostname, int port) {
-    // TODO implement this function
-    return 0;
+    char port_str[16];
+    snprintf(port_str, sizeof(port_str), "%d", port);
+
+    struct addrinfo hints, *res = NULL, *p = NULL;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family   = AF_UNSPEC;      // allow IPv4 or IPv6
+    hints.ai_socktype = SOCK_STREAM;    // TCP
+
+    int rv = getaddrinfo(hostname, port_str, &hints, &res);
+    if (rv != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+        return -1;
+    }
+
+    int sockfd = -1;
+    for (p = res; p != NULL; p = p->ai_next) {
+        sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        if (sockfd == -1)
+            continue;
+
+        if (connect(sockfd, p->ai_addr, p->ai_addrlen) == 0)
+            break;  // happy
+
+        close(sockfd);
+        sockfd = -1;
+    }
+
+    freeaddrinfo(res);
+
+    if (sockfd == -1)
+        perror("connect_to_target_server: connect");
+
+    return sockfd;  // −1 on failure, valid fd when happy
 }
 
 /**
@@ -172,5 +203,27 @@ static int connect_to_target_server(const char *hostname, int port) {
  * @param client_socket
  */
 static void forward_response(int target_socket, int client_socket) {
-    // TODO Implement this function
+    char buffer[BUFFER_SIZE];
+
+    while (1) {
+        ssize_t nread = recv(target_socket, buffer, sizeof(buffer), 0);
+        if (nread == 0) {   // connection closed
+            break;
+        }                
+        if (nread < 0) {
+            perror("forward_response: recv");
+            return;
+        }
+
+        // write buffer to client 
+        ssize_t total = 0;
+        while (total < nread) {
+            ssize_t nsent = send(client_socket, buffer + total, nread - total, MSG_NOSIGNAL);
+            if (nsent <= 0) {
+                perror("forward_response: send");
+                return;
+            }
+            total += nsent;
+        }
+    }
 }
